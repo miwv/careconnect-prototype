@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareConnect - Interactive Prototype (TM356)</title>
+<style>
+  :root {
+    --primary: #1B5E63;
+    --primary-hover: #14494D;
+    --primary-light: #E6F2F3;
+    --bg: #F8F9FA;
+    --surface: #FFFFFF;
+    --border: #CBD5E1;
+    --border-strong: #94A3B8;
+    --text: #1F2933;
+    --text-muted: #52606D;
+    --success: #15803D;
+    --success-bg: #DCFCE7;
+    --warning: #B45309;
+    --warning-bg: #FEF3C7;
+    --danger: #B91C1C;
+    --danger-bg: #FEE2E2;
+    --radius: 8px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    background: #E9EEF2;
+    color: var(--text);
+    line-height: 1.45;
+  }
+
+  /* Prototype Switcher Bar */
+  .proto-bar {
+    background: #1F2933;
+    color: #FFFFFF;
+    padding: 12px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 2px solid var(--primary);
+  }
+  .proto-brand {
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.2px;
+  }
+  .proto-brand span {
+    font-weight: 400;
+    color: #CBD5E1;
+    font-size: 13px;
+    margin-left: 8px;
+  }
+  .proto-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .view-btn {
+    background: #323F4B;
+    color: #FFFFFF;
+    border: 1px solid #52606D;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .view-btn.active {
+    background: var(--primary);
+    border-color: #FFFFFF;
+  }
+  .actor-select {
+    background: #323F4B;
+    color: #FFFFFF;
+    border: 1px solid #52606D;
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+
+  /* Workspace container */
+  .stage {
+    padding: 24px 16px 64px;
+    display: flex;
+    justify-content: center;
+  }
+  .hidden { display: none !important; }
+
+  /* Mobile Phone Frame */
+  .phone-frame {
+    width: 100%;
+    max-width: 390px;
+    min-height: 720px;
+    background: var(--bg);
+    border: 2px solid #323F4B;
+    border-radius: 24px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .app-header {
+    background: var(--primary);
+    color: #FFFFFF;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .app-header h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .app-header .sub {
+    font-size: 12px;
+    color: #E6F2F3;
+    margin-top: 2px;
+  }
+  .header-pill {
+    background: #FFFFFF;
+    color: var(--primary);
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 44px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .app-body {
+    padding: 14px;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  /* Bottom Navigation */
+  .bottom-nav {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+  }
+  .nav-tab {
+    border: none;
+    background: transparent;
+    padding: 12px 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    min-height: 52px;
+    border-top: 3px solid transparent;
+  }
+  .nav-tab.active {
+    color: var(--primary);
+    border-top-color: var(--primary);
+    background: var(--primary-light);
+  }
+
+  /* Cards & Lists */
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 14px 0 8px;
+  }
+  .section-head:first-child { margin-top: 2px; }
+  .section-head h2 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .sync-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 2px;
+  }
+  .card-meta {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .badge-taken { background: var(--success-bg); color: var(--success); }
+  .badge-due { background: var(--warning-bg); color: var(--warning); }
+  .badge-missed { background: var(--danger-bg); color: var(--danger); }
+  .badge-upcoming { background: #E2E8F0; color: #334155; }
+  .badge-claimed { background: var(--primary-light); color: var(--primary); }
+
+  .card-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* Buttons (44px+ min height on mobile/web controls per Style Guide) */
+  .btn {
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 14px;
+    min-height: 44px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: #FFFFFF;
+  }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border-strong);
+  }
+  .btn-secondary:hover { background: #F1F5F9; }
+  .btn-sm {
+    padding: 8px 14px;
+    min-height: 44px;
+    font-size: 13px;
+  }
+  .btn-block { width: 100%; }
+
+  /* Forms */
+  .form-box {
+    background: var(--surface);
+    border: 1px solid var(--primary);
+    border-radius: var(--radius);
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  .form-row { margin-bottom: 10px; }
+  .form-row label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .form-row input, .form-row select {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: var(--font-sans);
+  }
+  .form-err {
+    color: var(--danger);
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  /* Filter chips */
+  .filter-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .chip {
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .chip.active {
+    background: var(--primary);
+    color: #FFFFFF;
+    border-color: var(--primary);
+  }
+  .collapse-toggle {
+    width: 100%;
+    text-align: left;
+    background: #EDF2F7;
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    min-height: 44px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  /* Senior Mode Styles (22px+ readable typography, high contrast, 64px+ targets) */
+  .senior-frame .app-header {
+    padding: 18px 16px;
+  }
+  .senior-frame .app-header h1 { font-size: 24px; }
+  .senior-frame .app-header .sub { font-size: 16px; }
+  .senior-card {
+    background: #FFFFFF;
+    border: 3px solid var(--primary);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .senior-label {
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--primary);
+    margin: 0 0 8px;
+  }
+  .senior-med-time {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--warning);
+    margin: 0 0 4px;
+  }
+  .senior-med-name {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 6px;
+    color: #111827;
+  }
+  .senior-med-note {
+    font-size: 20px;
+    color: #334155;
+    margin: 0 0 18px;
+  }
+  .senior-btn {
+    width: 100%;
+    min-height: 68px;
+    font-size: 21px;
+    font-weight: 700;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    padding: 14px;
+  }
+  .senior-btn-primary {
+    background: var(--primary);
+    color: #FFFFFF;
+  }
+  .senior-btn-primary:hover { background: var(--primary-hover); }
+  .senior-btn-call {
+    background: #FFFFFF;
+    color: var(--primary);
+    border: 3px solid var(--primary);
+  }
+  .senior-btn-call:hover { background: var(--primary-light); }
+  .senior-done-box {
+    background: var(--success-bg);
+    border: 2px solid var(--success);
+    border-radius: 10px;
+    padding: 16px;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--success);
+    text-align: center;
+  }
+  .senior-confirm-banner {
+    background: var(--success-bg);
+    border: 2px solid var(--success);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--success);
+  }
+  .senior-visit-strip {
+    background: #FFFFFF;
+    border: 2px solid var(--border-strong);
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 18px;
+  }
+
+  /* Web Coordinator Interface */
+  .web-shell {
+    width: 100%;
+    max-width: 1040px;
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .web-header {
+    background: var(--primary);
+    color: #FFFFFF;
+    padding: 16px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .web-header h1 { margin: 0; font-size: 20px; }
+  .web-header p { margin: 2px 0 0; font-size: 13px; color: #E6F2F3; }
+  .web-content {
+    padding: 20px 24px 28px;
+  }
+  .web-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 20px;
+    margin-top: 18px;
+  }
+  @media (max-width: 800px) {
+    .web-grid { grid-template-columns: 1fr; }
+  }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .panel h2 {
+    margin: 0 0 12px;
+    font-size: 16px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+  table.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  table.history-table th, table.history-table td {
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    text-align: center;
+  }
+  table.history-table th {
+    background: #F1F5F9;
+    font-weight: 700;
+  }
+  table.history-table td:first-child, table.history-table th:first-child {
+    text-align: left;
+  }
+  .cell-ok { background: var(--success-bg); color: var(--success); font-weight: 700; }
+  .cell-miss { background: var(--danger-bg); color: var(--danger); font-weight: 700; }
+  .cell-due { background: var(--warning-bg); color: var(--warning); font-weight: 700; }
+
+  /* Modal & Snackbar */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 50;
+  }
+  .modal {
+    background: #FFFFFF;
+    border-radius: 10px;
+    max-width: 460px;
+    width: 100%;
+    padding: 20px;
+    border: 2px solid var(--primary);
+  }
+  .modal h3 { margin: 0 0 10px; font-size: 20px; }
+  .modal p { margin: 0 0 16px; font-size: 16px; color: var(--text); }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+  .snackbar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1F2933;
+    color: #FFFFFF;
+    padding: 12px 18px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 14px;
+    z-index: 60;
+    max-width: 92vw;
+  }
+  .snackbar button {
+    background: #FFFFFF;
+    color: #1F2933;
+    border: none;
+    padding: 8px 14px;
+    min-height: 44px;
+    border-radius: 4px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .summary-pre {
+    background: #F8F9FA;
+    border: 1px solid var(--border);
+    padding: 12px;
+    font-family: monospace;
+    font-size: 13px;
+    white-space: pre-wrap;
+    margin-bottom: 14px;
+  }
+
+  /* Clean 1-page printable Doctor Visit Summary */
+  @media print {
+    body { background: #FFFFFF; }
+    .proto-bar, .snackbar, .modal-actions { display: none !important; }
+    .stage { padding: 0; }
+    .modal-backdrop {
+      position: static;
+      background: #FFFFFF;
+      padding: 0;
+      display: block;
+    }
+    .modal {
+      border: none;
+      max-width: 100%;
+      padding: 0;
+    }
+    body.printing-summary .stage { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="proto-bar">
+  <div class="proto-brand">CareConnect Prototype <span>TM356 Interactive Deliverable (Mobile + Web)</span></div>
+  <div class="proto-controls">
+    <button class="view-btn active" id="btnViewCaregiver" onclick="switchView('caregiver')">Mobile: Caregiver</button>
+    <button class="view-btn" id="btnViewSenior" onclick="switchView('senior')">Mobile: Senior Mode</button>
+    <button class="view-btn" id="btnViewWeb" onclick="switchView('web')">Web: Coordinator</button>
+    <select class="actor-select" id="actorSelect" aria-label="Active family member" onchange="setActor(this.value)">
+      <option value="Mona">Signed in: Mona (Daughter)</option>
+      <option value="Tarek">Signed in: Tarek (Son)</option>
+      <option value="Karim">Signed in: Karim (Son)</option>
+    </select>
+  </div>
+</div>
+
+<div class="stage">
+  <!-- VIEW 1: MOBILE CAREGIVER -->
+  <div class="phone-frame" id="viewCaregiver">
+    <div class="app-header">
+      <div>
+        <h1>CareConnect</h1>
+        <div class="sub">Care Circle: Hagg Samir (73)</div>
+      </div>
+      <button class="header-pill" onclick="switchView('senior')">Senior Mode</button>
+    </div>
+
+    <div class="app-body">
+      <div class="sync-note" id="syncLabelMobile">Updated just now</div>
+
+      <!-- TAB: MEDS -->
+      <div id="tabMeds">
+        <div class="section-head">
+          <h2>Today's Medicines</h2>
+          <button class="btn btn-primary btn-sm" onclick="toggleAddMed()">+ Add Medicine</button>
+        </div>
+
+        <div class="form-box hidden" id="addMedForm">
+          <div class="form-err hidden" id="medFormErr"></div>
+          <div class="form-row">
+            <label for="medNameInput">Medicine Name</label>
+            <input id="medNameInput" type="text" placeholder="e.g., Aspirin 75mg">
+          </div>
+          <div class="form-row">
+            <label for="medDoseInput">Dose Instructions</label>
+            <input id="medDoseInput" type="text" placeholder="e.g., 1 tablet after lunch">
+          </div>
+          <div class="form-row">
+            <label for="medTimeInput">Scheduled Time</label>
+            <input id="medTimeInput" type="time" value="16:00">
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-primary btn-sm" onclick="saveNewMed()">Save Medicine</button>
+            <button class="btn btn-secondary btn-sm" onclick="toggleAddMed(false)">Cancel</button>
+          </div>
+        </div>
+
+        <div id="caregiverMedList"></div>
+      </div>
+
+      <!-- TAB: TASKS -->
+      <div id="tabTasks" class="hidden">
+        <div class="section-head">
+          <h2>Family Care Tasks</h2>
+          <button class="btn btn-primary btn-sm" onclick="toggleAddTask()">+ New Task</button>
+        </div>
+
+        <div class="form-box hidden" id="addTaskForm">
+          <div class="form-err hidden" id="taskFormErr"></div>
+          <div class="form-row">
+            <label for="taskTitleInput">Task Description</label>
+            <input id="taskTitleInput" type="text" placeholder="e.g., Pick up Metformin refill">
+          </div>
+          <div class="form-row">
+            <label for="taskDueInput">Day and Time</label>
+            <input id="taskDueInput" type="text" placeholder="e.g., Fri 18:00">
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-primary btn-sm" onclick="saveNewTask()">Add Task</button>
+            <button class="btn btn-secondary btn-sm" onclick="toggleAddTask(false)">Cancel</button>
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <button class="chip active" id="chipAll" onclick="setTaskFilter('all')">All Open</button>
+          <button class="chip" id="chipUnassigned" onclick="setTaskFilter('unassigned')">Unassigned</button>
+          <button class="chip" id="chipMine" onclick="setTaskFilter('mine')">Claimed by Me</button>
+        </div>
+
+        <div id="caregiverTaskList"></div>
+
+        <button class="collapse-toggle" id="completedToggleBtn" onclick="toggleCompletedTasks()">
+          Show completed tasks (1)
+        </button>
+        <div id="completedTaskList" class="hidden" style="margin-top:8px;"></div>
+      </div>
+
+      <!-- TAB: VISITS -->
+      <div id="tabVisits" class="hidden">
+        <div class="section-head">
+          <h2>Upcoming Appointments</h2>
+        </div>
+        <div id="caregiverVisitList"></div>
+        <button class="btn btn-secondary btn-block" onclick="openDoctorSummary()">View Doctor Visit Summary</button>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="nav-tab active" id="navMeds" onclick="switchMobileTab('meds')">Meds</button>
+      <button class="nav-tab" id="navTasks" onclick="switchMobileTab('tasks')">Family Tasks</button>
+      <button class="nav-tab" id="navVisits" onclick="switchMobileTab('visits')">Visits</button>
+    </div>
+  </div>
+
+  <!-- VIEW 2: MOBILE SENIOR MODE -->
+  <div class="phone-frame senior-frame hidden" id="viewSenior">
+    <div class="app-header">
+      <div>
+        <h1>Hello, Samir</h1>
+        <div class="sub">Thursday, 19 November</div>
+      </div>
+      <button class="header-pill" onclick="switchView('caregiver')">Exit Mode</button>
+    </div>
+
+    <div class="app-body">
+      <div class="senior-card" id="seniorMedCard"></div>
+
+      <div class="senior-card">
+        <p class="senior-label">Need Help?</p>
+        <p class="senior-med-note" style="margin-bottom:14px;">Tap below to call your daughter Mona.</p>
+        <button class="senior-btn senior-btn-call" onclick="openCallModal()">Call Mona (Daughter)</button>
+      </div>
+
+      <div class="senior-visit-strip" id="seniorVisitStrip">
+        <strong>Next Doctor Visit:</strong><br>
+        Thursday 10:00 AM with Dr. Hany (Cardiology).<br>
+        <span style="color:#1B5E63; font-weight:700;">Mona is driving you.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 3: WEB COORDINATOR INTERFACE -->
+  <div class="web-shell hidden" id="viewWeb">
+    <div class="web-header">
+      <div>
+        <h1>CareConnect Web Coordinator</h1>
+        <p>Care Circle: Hagg Samir El-Sayed (73) | Active user: <strong id="webActorName">Mona</strong></p>
+      </div>
+      <div>
+        <button class="header-pill" onclick="openDoctorSummary()">Print Doctor Visit Summary</button>
+      </div>
+    </div>
+
+    <div class="web-content">
+      <div class="panel">
+        <h2>Weekly Medicine History (Sat - Fri)</h2>
+        <div style="overflow-x:auto;">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Medicine</th>
+                <th>Sat</th>
+                <th>Sun</th>
+                <th>Mon</th>
+                <th>Tue</th>
+                <th>Wed</th>
+                <th>Thu (Today)</th>
+                <th>Fri</th>
+              </tr>
+            </thead>
+            <tbody id="webHistoryBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="web-grid">
+        <div class="panel">
+          <h2>Shared Family Tasks</h2>
+          <div id="webTaskList"></div>
+        </div>
+        <div class="panel">
+          <h2>Upcoming Appointments</h2>
+          <div id="webVisitList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRMATION MODAL (Error Prevention for Senior Mode & General Actions) -->
+<div class="modal-backdrop hidden" id="confirmModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h3 id="modalTitle">Confirm Medicine</h3>
+    <p id="modalBody"></p>
+    <div id="modalExtra"></div>
+    <div class="modal-actions" id="modalActions"></div>
+  </div>
+</div>
+
+<!-- UNDO SNACKBAR (User Control & Freedom) -->
+<div class="snackbar hidden" id="snackbar">
+  <span id="snackbarMsg">Medicine marked as taken.</span>
+  <button id="snackbarUndoBtn" onclick="runUndo()">Undo</button>
+</div>
+
+<script>
+  var state = {
+    currentView: 'caregiver',
+    mobileTab: 'meds',
+    taskFilter: 'all',
+    showCompleted: false,
+    actor: 'Mona',
+    lastUndo: null,
+    undoTimer: null,
+    lastSeniorConfirm: null,
+    meds: [
+      { id: 1, name: 'Metformin 500mg', dose: '1 tablet with breakfast', time: '08:00', status: 'taken', takenAt: '08:12', takenBy: 'Samir', week: ['OK','OK','OK','OK','OK','OK','-'] },
+      { id: 2, name: 'Concor 5mg', dose: '1 tablet with water', time: '14:00', status: 'due', takenAt: '', takenBy: '', week: ['OK','OK','MISS','OK','OK','DUE','-'] },
+      { id: 3, name: 'Insulin Lantus', dose: '14 units before sleep', time: '20:00', status: 'upcoming', takenAt: '', takenBy: '', week: ['OK','OK','OK','OK','OK','UP','-'] }
+    ],
+    tasks: [
+      { id: 101, title: 'Drive to Dr. Hany (Cardiology Clinic)', due: 'Thu 10:00', owner: 'Mona', claimedAt: 'Tue 18:20', done: false },
+      { id: 102, title: 'Pick up Concor 5mg & test strips from El-Ezaby Pharmacy', due: 'Fri 17:00', owner: '', claimedAt: '', done: false },
+      { id: 103, title: 'Drop off weekly groceries', due: 'Sat 13:00', owner: 'Tarek', claimedAt: 'Wed 11:05', done: false },
+      { id: 104, title: 'Collect blood panel results from Al-Mokhtabar Lab', due: 'Tue 15:00', owner: 'Karim', claimedAt: 'Mon 20:10', done: true }
+    ],
+    visits: [
+      { id: 201, doctor: 'Dr. Hany Mansour (Cardiology)', when: 'Thu 10:00 AM', location: 'Dokki Heart Clinic, Giza', driver: 'Mona' },
+      { id: 202, doctor: 'Routine Fasting Blood Test', when: 'Mon 09:00 AM', location: 'Al-Mokhtabar Lab, Mohandessin', driver: 'Unassigned' }
+    ]
+  };
+
+  function nowTime() {
+    var d = new Date();
+    var hh = String(d.getHours()).padStart(2, '0');
+    var mm = String(d.getMinutes()).padStart(2, '0');
+    return hh + ':' + mm;
+  }
+
+  function updateSyncStamp() {
+    var el = document.getElementById('syncLabelMobile');
+    if (el) el.textContent = 'Updated at ' + nowTime();
+  }
+
+  function setActor(name) {
+    state.actor = name;
+    document.getElementById('webActorName').textContent = name;
+    renderAll();
+  }
+
+  function switchView(view) {
+    state.currentView = view;
+    document.getElementById('viewCaregiver').classList.toggle('hidden', view !== 'caregiver');
+    document.getElementById('viewSenior').classList.toggle('hidden', view !== 'senior');
+    document.getElementById('viewWeb').classList.toggle('hidden', view !== 'web');
+    document.getElementById('btnViewCaregiver').classList.toggle('active', view === 'caregiver');
+    document.getElementById('btnViewSenior').classList.toggle('active', view === 'senior');
+    document.getElementById('btnViewWeb').classList.toggle('active', view === 'web');
+    renderAll();
+  }
+
+  function switchMobileTab(tab) {
+    state.mobileTab = tab;
+    document.getElementById('tabMeds').classList.toggle('hidden', tab !== 'meds');
+    document.getElementById('tabTasks').classList.toggle('hidden', tab !== 'tasks');
+    document.getElementById('tabVisits').classList.toggle('hidden', tab !== 'visits');
+    document.getElementById('navMeds').classList.toggle('active', tab === 'meds');
+    document.getElementById('navTasks').classList.toggle('active', tab === 'tasks');
+    document.getElementById('navVisits').classList.toggle('active', tab === 'visits');
+  }
+
+  function setTaskFilter(f) {
+    state.taskFilter = f;
+    document.getElementById('chipAll').classList.toggle('active', f === 'all');
+    document.getElementById('chipUnassigned').classList.toggle('active', f === 'unassigned');
+    document.getElementById('chipMine').classList.toggle('active', f === 'mine');
+    renderAll();
+  }
+
+  function toggleCompletedTasks() {
+    state.showCompleted = !state.showCompleted;
+    renderAll();
+  }
+
+  function toggleAddMed(forceState) {
+    var box = document.getElementById('addMedForm');
+    var err = document.getElementById('medFormErr');
+    err.classList.add('hidden');
+    if (typeof forceState === 'boolean') {
+      box.classList.toggle('hidden', !forceState);
+    } else {
+      box.classList.toggle('hidden');
+    }
+  }
+
+  function saveNewMed() {
+    var name = document.getElementById('medNameInput').value.trim();
+    var dose = document.getElementById('medDoseInput').value.trim();
+    var time = document.getElementById('medTimeInput').value.trim();
+    var err = document.getElementById('medFormErr');
+    if (!name || !dose || !time) {
+      err.textContent = 'Please enter medicine name, dose instructions, and time.';
+      err.classList.remove('hidden');
+      return;
+    }
+    var newId = Date.now();
+    state.meds.push({
+      id: newId, name: name, dose: dose, time: time, status: 'due',
+      takenAt: '', takenBy: '', week: ['-','-','-','-','-','DUE','-']
+    });
+    state.meds.sort(function(a, b) { return a.time.localeCompare(b.time); });
+    document.getElementById('medNameInput').value = '';
+    document.getElementById('medDoseInput').value = '';
+    toggleAddMed(false);
+    updateSyncStamp();
+    renderAll();
+    showSnackbar('Added ' + name + ' to schedule.', null);
+  }
+
+  function toggleAddTask(forceState) {
+    var box = document.getElementById('addTaskForm');
+    var err = document.getElementById('taskFormErr');
+    err.classList.add('hidden');
+    if (typeof forceState === 'boolean') {
+      box.classList.toggle('hidden', !forceState);
+    } else {
+      box.classList.toggle('hidden');
+    }
+  }
+
+  function saveNewTask() {
+    var title = document.getElementById('taskTitleInput').value.trim();
+    var due = document.getElementById('taskDueInput').value.trim();
+    var err = document.getElementById('taskFormErr');
+    if (!title || !due) {
+      err.textContent = 'Please enter both the task description and day/time.';
+      err.classList.remove('hidden');
+      return;
+    }
+    state.tasks.unshift({
+      id: Date.now(), title: title, due: due, owner: '', claimedAt: '', done: false
+    });
+    document.getElementById('taskTitleInput').value = '';
+    document.getElementById('taskDueInput').value = '';
+    toggleAddTask(false);
+    updateSyncStamp();
+    renderAll();
+    showSnackbar('Family task added.', null);
+  }
+
+  function markMedTaken(id, who) {
+    var med = state.meds.find(function(m) { return m.id === id; });
+    if (!med || med.status === 'taken') return;
+    var prev = {
+      status: med.status,
+      takenAt: med.takenAt,
+      takenBy: med.takenBy,
+      thu: med.week[5],
+      lastSeniorConfirm: state.lastSeniorConfirm
+    };
+    med.status = 'taken';
+    med.takenAt = nowTime();
+    med.takenBy = who;
+    med.week[5] = 'OK';
+    if (who === 'Samir') {
+      state.lastSeniorConfirm = { name: med.name, time: med.takenAt };
+    }
+    updateSyncStamp();
+    renderAll();
+    showSnackbar(med.name + ' marked as taken at ' + med.takenAt + '.', function() {
+      med.status = prev.status;
+      med.takenAt = prev.takenAt;
+      med.takenBy = prev.takenBy;
+      med.week[5] = prev.thu;
+      state.lastSeniorConfirm = prev.lastSeniorConfirm;
+      updateSyncStamp();
+      renderAll();
+    });
+  }
+
+  function confirmSeniorMed(id) {
+    var med = state.meds.find(function(m) { return m.id === id; });
+    if (!med) return;
+    openModal(
+      'Did you take your medicine?',
+      med.name + ' (' + med.dose + '). Tap "Yes, I took it" to confirm.',
+      '',
+      [
+        { label: 'Cancel', cls: 'btn btn-secondary', fn: closeModal },
+        { label: 'Yes, I took it', cls: 'btn btn-primary', fn: function() { closeModal(); markMedTaken(id, 'Samir'); } }
+      ]
+    );
+  }
+
+  function claimTask(id) {
+    var task = state.tasks.find(function(t) { return t.id === id; });
+    if (!task) return;
+    var prevOwner = task.owner;
+    var prevClaimed = task.claimedAt;
+    task.owner = state.actor;
+    task.claimedAt = 'Today ' + nowTime();
+    updateSyncStamp();
+    renderAll();
+    showSnackbar('Task claimed by ' + state.actor + '.', function() {
+      task.owner = prevOwner;
+      task.claimedAt = prevClaimed;
+      updateSyncStamp();
+      renderAll();
+    });
+  }
+
+  function completeTask(id) {
+    var task = state.tasks.find(function(t) { return t.id === id; });
+    if (!task) return;
+    var prevOwner = task.owner;
+    if (!task.owner) task.owner = state.actor;
+    task.done = true;
+    updateSyncStamp();
+    renderAll();
+    showSnackbar('Marked task done.', function() {
+      task.done = false;
+      task.owner = prevOwner;
+      updateSyncStamp();
+      renderAll();
+    });
+  }
+
+  function openCallModal() {
+    openModal(
+      'Calling Mona (Daughter)...',
+      'Phone call simulation: +20 10-XXXX-XXXX. In the live mobile app, this triggers the native dialer directly.',
+      '',
+      [{ label: 'End Call', cls: 'btn btn-primary', fn: closeModal }]
+    );
+  }
+
+  function openDoctorSummary() {
+    var lines = [];
+    var days = ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+    var missedNotes = [];
+    lines.push('CARECONNECT DOCTOR VISIT SUMMARY');
+    lines.push('Patient: Hagg Samir El-Sayed (Age 73)');
+    lines.push('Prepared by: ' + state.actor + ' | Generated: Thu ' + nowTime());
+    lines.push('----------------------------------------');
+    lines.push('CURRENT MEDICATIONS & WEEKLY MEDICINE HISTORY:');
+    state.meds.forEach(function(m) {
+      var takenCount = m.week.filter(function(w) { return w === 'OK'; }).length;
+      var loggedDays = m.week.filter(function(w) { return w !== '-'; }).length;
+      lines.push('- ' + m.name + ' (' + m.time + ', ' + m.dose + '): ' + takenCount + '/' + loggedDays + ' scheduled doses taken');
+      m.week.forEach(function(w, idx) {
+        if (w === 'MISS') missedNotes.push(m.name + ' on ' + days[idx]);
+      });
+    });
+    lines.push('----------------------------------------');
+    lines.push('NOTE FOR CLINICIAN: ' + (missedNotes.length ? ('Missed dose(s): ' + missedNotes.join(', ') + '.') : 'No missed doses recorded this week.'));
+    document.body.classList.add('printing-summary');
+    openModal(
+      'Doctor Visit Summary (Printable)',
+      'Ready to show or print at the clinic appointment:',
+      '<div class="summary-pre">' + escapeHtml(lines.join('\n')) + '</div>',
+      [
+        { label: 'Close', cls: 'btn btn-secondary', fn: closeModal },
+        { label: 'Print Page', cls: 'btn btn-primary', fn: function() { window.print(); } }
+      ]
+    );
+  }
+
+  function openModal(title, body, extraHtml, buttons) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalBody').textContent = body;
+    document.getElementById('modalExtra').innerHTML = extraHtml || '';
+    var actions = document.getElementById('modalActions');
+    actions.innerHTML = '';
+    buttons.forEach(function(b) {
+      var btn = document.createElement('button');
+      btn.className = b.cls;
+      btn.textContent = b.label;
+      btn.onclick = b.fn;
+      actions.appendChild(btn);
+    });
+    document.getElementById('confirmModal').classList.remove('hidden');
+  }
+
+  function closeModal() {
+    document.getElementById('confirmModal').classList.add('hidden');
+    document.body.classList.remove('printing-summary');
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !document.getElementById('confirmModal').classList.contains('hidden')) {
+      closeModal();
+    }
+  });
+
+  function showSnackbar(msg, undoFn) {
+    clearTimeout(state.undoTimer);
+    state.lastUndo = undoFn;
+    document.getElementById('snackbarMsg').textContent = msg;
+    document.getElementById('snackbarUndoBtn').classList.toggle('hidden', !undoFn);
+    document.getElementById('snackbar').classList.remove('hidden');
+    state.undoTimer = setTimeout(function() {
+      document.getElementById('snackbar').classList.add('hidden');
+      state.lastUndo = null;
+    }, 5000);
+  }
+
+  function runUndo() {
+    if (typeof state.lastUndo === 'function') {
+      clearTimeout(state.undoTimer);
+      var fn = state.lastUndo;
+      state.lastUndo = null;
+      document.getElementById('snackbar').classList.add('hidden');
+      fn();
+    }
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderAll() {
+    renderCaregiverMeds();
+    renderCaregiverTasks();
+    renderVisits();
+    renderSeniorView();
+    renderWebView();
+  }
+
+  function renderCaregiverMeds() {
+    var html = '';
+    state.meds.forEach(function(m) {
+      var badgeCls = m.status === 'taken' ? 'badge-taken' : (m.status === 'due' ? 'badge-due' : 'badge-upcoming');
+      var badgeTxt = m.status === 'taken' ? ('Taken ' + m.takenAt) : (m.status === 'due' ? 'Due now' : 'Upcoming');
+      html += '<div class="card">' +
+        '<div class="card-top">' +
+          '<div><p class="card-title">' + escapeHtml(m.time + ' - ' + m.name) + '</p>' +
+          '<p class="card-meta">' + escapeHtml(m.dose) + (m.takenBy ? ' (logged by ' + escapeHtml(m.takenBy) + ')' : '') + '</p></div>' +
+          '<span class="badge ' + badgeCls + '">' + escapeHtml(badgeTxt) + '</span>' +
+        '</div>';
+      if (m.status !== 'taken') {
+        html += '<div class="card-actions"><button class="btn btn-primary btn-sm" onclick="markMedTaken(' + m.id + ', state.actor)">Mark as Taken</button></div>';
+      }
+      html += '</div>';
+    });
+    document.getElementById('caregiverMedList').innerHTML = html;
+  }
+
+  function renderCaregiverTasks() {
+    var open = state.tasks.filter(function(t) { return !t.done; });
+    var completed = state.tasks.filter(function(t) { return t.done; });
+
+    var filtered = open.filter(function(t) {
+      if (state.taskFilter === 'unassigned') return !t.owner;
+      if (state.taskFilter === 'mine') return t.owner === state.actor;
+      return true;
+    });
+
+    var html = '';
+    if (filtered.length === 0) {
+      html = '<div class="card"><p class="card-meta">No tasks match this filter.</p></div>';
+    } else {
+      filtered.forEach(function(t) {
+        var badge = t.owner
+          ? '<span class="badge badge-claimed">Claimed: ' + escapeHtml(t.owner) + '</span>'
+          : '<span class="badge badge-due">Unassigned</span>';
+        var ownerMeta = t.owner
+          ? 'Claimed by ' + escapeHtml(t.owner) + ' (' + escapeHtml(t.claimedAt) + ')'
+          : 'Nobody has claimed this task yet';
+        html += '<div class="card">' +
+          '<div class="card-top">' +
+            '<div><p class="card-title">' + escapeHtml(t.title) + '</p>' +
+            '<p class="card-meta">' + escapeHtml(t.due) + ' | ' + ownerMeta + '</p></div>' +
+            badge +
+          '</div>' +
+          '<div class="card-actions">' +
+            (t.owner !== state.actor ? '<button class="btn btn-primary btn-sm" onclick="claimTask(' + t.id + ')">Claim Task</button>' : '') +
+            '<button class="btn btn-secondary btn-sm" onclick="completeTask(' + t.id + ')">Mark Done</button>' +
+          '</div>' +
+        '</div>';
+      });
+    }
+    document.getElementById('caregiverTaskList').innerHTML = html;
+
+    var btn = document.getElementById('completedToggleBtn');
+    btn.textContent = (state.showCompleted ? 'Hide' : 'Show') + ' completed tasks (' + completed.length + ')';
+    var cList = document.getElementById('completedTaskList');
+    cList.classList.toggle('hidden', !state.showCompleted);
+    var cHtml = '';
+    completed.forEach(function(t) {
+      cHtml += '<div class="card"><p class="card-title">' + escapeHtml(t.title) + '</p>' +
+        '<p class="card-meta">Completed by ' + escapeHtml(t.owner || 'Family') + ' (' + escapeHtml(t.due) + ')</p></div>';
+    });
+    cList.innerHTML = cHtml;
+  }
+
+  function renderVisits() {
+    var driveTask = state.tasks.find(function(t) { return t.id === 101; });
+    if (driveTask && state.visits.length > 0) {
+      state.visits[0].driver = driveTask.owner || 'Unassigned';
+    }
+    var html = '';
+    state.visits.forEach(function(v) {
+      html += '<div class="card">' +
+        '<p class="card-title">' + escapeHtml(v.doctor) + '</p>' +
+        '<p class="card-meta">' + escapeHtml(v.when) + ' | ' + escapeHtml(v.location) + '</p>' +
+        '<p class="card-meta" style="margin-top:4px;"><strong>Ride:</strong> ' + escapeHtml(v.driver) + '</p>' +
+      '</div>';
+    });
+    document.getElementById('caregiverVisitList').innerHTML = html;
+    document.getElementById('webVisitList').innerHTML = html;
+  }
+
+  function renderSeniorView() {
+    var next = state.meds.find(function(m) { return m.status !== 'taken'; });
+    var box = document.getElementById('seniorMedCard');
+    var banner = '';
+    if (state.lastSeniorConfirm) {
+      banner = '<div class="senior-confirm-banner" role="status">&#10003; ' +
+        escapeHtml(state.lastSeniorConfirm.name) + ' recorded at ' +
+        escapeHtml(state.lastSeniorConfirm.time) + ' &mdash; Mona can see this now.</div>';
+    }
+    if (!next) {
+      box.innerHTML = banner + '<p class="senior-label">Today\'s Medicines</p>' +
+        '<div class="senior-done-box">All medicines for today are finished. Well done, Samir.</div>';
+    } else {
+      box.innerHTML = banner + '<p class="senior-label">Next Medicine</p>' +
+        '<p class="senior-med-time">' + escapeHtml(next.time) + '</p>' +
+        '<p class="senior-med-name">' + escapeHtml(next.name) + '</p>' +
+        '<p class="senior-med-note">' + escapeHtml(next.dose) + '</p>' +
+        '<button class="senior-btn senior-btn-primary" onclick="confirmSeniorMed(' + next.id + ')">I Took My Medicine</button>';
+    }
+    var visitStrip = document.getElementById('seniorVisitStrip');
+    if (visitStrip && state.visits.length > 0) {
+      var drv = state.visits[0].driver;
+      var drvLine = (drv && drv !== 'Unassigned')
+        ? (escapeHtml(drv) + ' is driving you.')
+        : 'Family ride to be confirmed.';
+      visitStrip.innerHTML = '<strong>Next Doctor Visit:</strong><br>' +
+        'Thursday 10:00 AM with Dr. Hany (Cardiology).<br>' +
+        '<span style="color:#1B5E63; font-weight:700;">' + drvLine + '</span>';
+    }
+  }
+
+  function renderWebView() {
+    var tbody = '';
+    state.meds.forEach(function(m) {
+      tbody += '<tr><td><strong>' + escapeHtml(m.name) + '</strong><br><span style="font-size:12px;color:#52606D;">' + escapeHtml(m.time) + '</span></td>';
+      m.week.forEach(function(w) {
+        var cls = w === 'OK' ? 'cell-ok' : (w === 'MISS' ? 'cell-miss' : (w === 'DUE' ? 'cell-due' : ''));
+        tbody += '<td class="' + cls + '">' + escapeHtml(w) + '</td>';
+      });
+      tbody += '</tr>';
+    });
+    document.getElementById('webHistoryBody').innerHTML = tbody;
+
+    var tHtml = '';
+    state.tasks.filter(function(t) { return !t.done; }).forEach(function(t) {
+      var status = t.owner ? ('Claimed by ' + escapeHtml(t.owner) + ' (' + escapeHtml(t.claimedAt) + ')') : 'Unassigned';
+      tHtml += '<div class="card">' +
+        '<div class="card-top">' +
+          '<div><p class="card-title">' + escapeHtml(t.title) + '</p>' +
+          '<p class="card-meta">' + escapeHtml(t.due) + ' | ' + status + '</p></div>' +
+          (t.owner !== state.actor ? '<button class="btn btn-primary btn-sm" onclick="claimTask(' + t.id + ')">Claim Task</button>' : '<span class="badge badge-claimed">Yours</span>') +
+        '</div>' +
+      '</div>';
+    });
+    document.getElementById('webTaskList').innerHTML = tHtml || '<p class="card-meta">All family tasks completed.</p>';
+  }
+
+  (function initFromQuery() {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('embed') === '1') {
+      var bar = document.querySelector('.proto-bar');
+      if (bar) bar.classList.add('hidden');
+      var stage = document.querySelector('.stage');
+      if (stage) stage.style.padding = '16px';
+    }
+    var view = params.get('view');
+    var tab = params.get('tab');
+    var modal = params.get('modal');
+    if (tab === 'meds' || tab === 'tasks' || tab === 'visits') {
+      switchMobileTab(tab);
+    }
+    if (view === 'caregiver' || view === 'senior' || view === 'web') {
+      switchView(view);
+    } else {
+      renderAll();
+    }
+    if (modal === 'confirm') {
+      confirmSeniorMed(2);
+    } else if (modal === 'summary') {
+      openDoctorSummary();
+    }
+  })();
+</script>
+</body>
+</html>
